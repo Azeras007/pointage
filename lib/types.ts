@@ -7,7 +7,7 @@ export type Settings = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
-  hourlyRate: 12.02,
+  hourlyRate: 12.31,
   hoursPerDay: 8,
   workDays: [1, 2, 3],
   dayEnd: "18:00",

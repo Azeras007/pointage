@@ -25,7 +25,7 @@ describe("computeMonth", () => {
     expect(r.pastBalanceMin).toBe(-60);
     expect(r.deficitMin).toBe(60);
     expect(r.retainedHours).toBe(1);
-    expect(r.retainedEuros).toBe(12.02);
+    expect(r.retainedEuros).toBe(12.31);
   });
 
   it("heure entamée = heure due", () => {

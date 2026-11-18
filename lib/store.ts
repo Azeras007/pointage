@@ -30,14 +30,6 @@ export async function listPunches(fromMs: number, toMs: number): Promise<number[
   return [...mem.punches].filter((p) => p >= fromMs && p <= toMs).sort((a, b) => a - b);
 }
 
-export async function lastPunch(): Promise<number | null> {
-  if (redis) {
-    const res = await redis.zrange<string[]>(KEY, -1, -1);
-    return res.length ? Number(res[0]) : null;
-  }
-  return mem.punches.size ? Math.max(...mem.punches) : null;
-}
-
 export async function getSettings(): Promise<Settings> {
   if (redis) {
     const s = await redis.get<Settings>("settings");
