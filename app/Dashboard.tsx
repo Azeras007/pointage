@@ -128,7 +128,7 @@ export default function Dashboard() {
                       <li key={p.date} className={d.isToday ? "now" : ""}>
                         <span>{d.isToday ? "Aujourd'hui" : dayLabel(d)}</span>
                         <span className="extra">+{p.extraMin} min</span>
-                        <span className="end">sortie {p.suggestedEnd}</span>
+                        <span className="end">sortie {(d.isToday && report.todayEnd) || p.suggestedEnd}</span>
                       </li>
                     );
                   })}
@@ -141,7 +141,9 @@ export default function Dashboard() {
             <>
               <p className="lead pos">{report.pastBalanceMin > 0 ? `${hm(report.pastBalanceMin)} d'avance` : "Tu es à jour"}</p>
               <p className="note">
-                {nextPlan || todayPlan
+                {todayPlan && report.todayEnd && report.todayEnd !== settings.dayEnd
+                  ? `Aujourd'hui, sors à ${report.todayEnd} pour compenser tes pauses et retards.`
+                  : nextPlan || todayPlan
                   ? `Horaires normaux, sortie à ${settings.dayEnd}.`
                   : "Plus aucun jour travaillé ce mois-ci."}
               </p>
@@ -181,12 +183,17 @@ function Hero({ today, plan, report, busy, onPunch }: { today: DayRow; plan?: Pl
   const last = today.punches.at(-1);
   const left = Math.max(0, target - today.workedMin);
 
+  const onBreak = !report.inProgress && today.punches.length > 0 && left > 0 && target > 0;
+
   let caption: string;
-  if (report.inProgress && last) caption = `Arrivé à ${parisHM(last)}${plan ? `, sortie conseillée à ${plan.suggestedEnd}` : ""}`;
+  if (report.inProgress && last)
+    caption = left > 0 && report.todayEnd ? `En poste depuis ${parisHM(last)}, sortie prévue à ${report.todayEnd}` : "Objectif du jour atteint, tu peux pointer la sortie";
   else if (target === 0) caption = `Pas de travail prévu ce ${DAY_FULL[today.weekday]}`;
   else if (today.punches.length === 0) caption = plan && plan.extraMin > 0 ? `Objectif ${hm(target)} aujourd'hui, sortie ${plan.suggestedEnd}` : `Objectif ${hm(target)} aujourd'hui`;
-  else if (left > 0) caption = `Encore ${hm(left)} pour l'objectif du jour`;
+  else if (onBreak && last) caption = `En pause depuis ${parisHM(last)}, encore ${hm(left)} à faire`;
   else caption = "Objectif du jour atteint";
+
+  const label = report.inProgress ? "Pointer la sortie" : onBreak ? "Pointer le retour" : "Pointer l'entrée";
 
   return (
     <section className="hero">
@@ -217,7 +224,7 @@ function Hero({ today, plan, report, busy, onPunch }: { today: DayRow; plan?: Pl
       </div>
       <p className="caption">{caption}</p>
       <button className={`punch ${report.inProgress ? "out" : "in"}`} onClick={onPunch} disabled={busy}>
-        {report.inProgress ? "Pointer la sortie" : "Pointer l'entrée"}
+        {label}
       </button>
     </section>
   );
@@ -258,6 +265,8 @@ function DayItem({ day, settings, mutate }: { day: DayRow; settings: Settings; m
   const future = !day.isPast && !day.isToday;
   const running = day.isToday && day.punches.length % 2 === 1;
   const pending = future || (day.isToday && day.balanceMin < 0);
+  const pauses: [number, number][] = [];
+  for (let i = 1; i + 1 < day.punches.length; i += 2) pauses.push([day.punches[i], day.punches[i + 1]]);
 
   function save() {
     if (!value) return;
@@ -279,6 +288,11 @@ function DayItem({ day, settings, mutate }: { day: DayRow; settings: Settings; m
       {open && (
         <div className="day-edit">
           <p className="note">{fmtDuration(day.workedMin)} faites sur {fmtDuration(day.dueMin)} prévues</p>
+          {pauses.length > 0 && (
+            <p className="note">
+              Pause{pauses.length > 1 ? "s" : ""} : {pauses.map(([a, b]) => `${parisHM(a)}–${parisHM(b)} (${Math.round((b - a) / 60000)} min)`).join(", ")}
+            </p>
+          )}
           <div className="chips">
             {day.punches.map((p, i) => (
               <button key={p} className={`chip ${editing === p ? "on" : ""}`} onClick={() => { setEditing(p); setValue(parisHM(p)); }}>

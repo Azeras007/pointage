@@ -1,7 +1,11 @@
-import { addMinutesHM, daysOfMonth, parisDay, parisMonth, weekdayOf } from "./time";
+import { addMinutesHM, daysOfMonth, parisDay, parisHM, parisMonth, weekdayOf } from "./time";
 import type { DayRow, MonthReport, PlanRow, Settings } from "./types";
 
 const MIN = 60_000;
+/** Pause déjeuner : 1 h, finie à 14:00 ; un écart ≥ 30 min compte comme déjeuner pris. */
+const LUNCH_MIN = 60;
+const LUNCH_END_MIN = 14 * 60;
+const LUNCH_GAP_MIN = 30;
 
 /**
  * Calcule le bilan d'un mois (par défaut le mois courant de `now`).
@@ -56,6 +60,23 @@ export function computeMonth(punches: number[], settings: Settings, now: number,
   }));
 
   const retainedHours = Math.ceil(deficitMin / 60);
+
+  // Heure de fin projetée pour aujourd'hui, pauses déjà prises incluses.
+  let todayEnd: string | undefined;
+  const todayRow = days.find((d) => d.isToday);
+  if (todayRow && inProgress) {
+    const target = plan.find((p) => p.date === today)?.targetMin ?? todayRow.dueMin;
+    if (target > 0) {
+      const remaining = Math.max(0, target - todayRow.workedMin);
+      const p = todayRow.punches;
+      let lunchTaken = false;
+      for (let i = 1; i + 1 < p.length; i += 2) if (p[i + 1] - p[i] >= LUNCH_GAP_MIN * MIN) lunchTaken = true;
+      const [h, m] = parisHM(now).split(":").map(Number);
+      const lunchPending = !lunchTaken && h * 60 + m < LUNCH_END_MIN;
+      todayEnd = parisHM(now + (remaining + (lunchPending ? LUNCH_MIN : 0)) * MIN);
+    }
+  }
+
   return {
     month,
     days,
@@ -67,5 +88,6 @@ export function computeMonth(punches: number[], settings: Settings, now: number,
     dueMonthMin: days.reduce((s, d) => s + d.dueMin, 0),
     workedMonthMin: days.reduce((s, d) => s + d.workedMin, 0),
     inProgress,
+    todayEnd,
   };
 }

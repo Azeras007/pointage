@@ -88,6 +88,28 @@ describe("computeMonth", () => {
     expect(r.plan.length).toBe(5);
   });
 
+  it("pause cigarette : fin du jour décalée d'autant", () => {
+    const d = "2026-11-18";
+    const now = at(d, "11:10");
+    const r = computeMonth([...perfectExcept("", []), at(d, "09:00"), at(d, "11:00"), at(d, "11:07")], DEFAULT_SETTINGS, now);
+    expect(r.days.find((x) => x.isToday)!.workedMin).toBe(123);
+    // 8h − 2h03 = 5h57 restantes + 1h de déjeuner pas encore prise → 18:07
+    expect(r.todayEnd).toBe("18:07");
+  });
+
+  it("fin du jour après le déjeuner déjà pris", () => {
+    const d = "2026-11-18";
+    const now = at(d, "15:00");
+    const r = computeMonth([...perfectExcept("", []), at(d, "09:00"), at(d, "13:00"), at(d, "14:00")], DEFAULT_SETTINGS, now);
+    expect(r.todayEnd).toBe("18:00");
+  });
+
+  it("pas de fin calculée pendant une pause", () => {
+    const d = "2026-11-18";
+    const r = computeMonth([...perfectExcept("", []), at(d, "09:00"), at(d, "11:00")], DEFAULT_SETTINGS, at(d, "11:03"));
+    expect(r.todayEnd).toBeUndefined();
+  });
+
   it("découpe en heure de Paris au changement d'heure", () => {
     expect(parisDay(at("2026-10-25", "23:30"))).toBe("2026-10-25");
     expect(parisDay(at("2026-03-29", "00:30"))).toBe("2026-03-29");

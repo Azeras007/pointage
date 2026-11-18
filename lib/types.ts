@@ -47,4 +47,6 @@ export type MonthReport = {
   workedMonthMin: number;
   /** pointage ouvert en ce moment (entrée sans sortie aujourd'hui) */
   inProgress: boolean;
+  /** heure de sortie projetée aujourd'hui (si en poste), pauses incluses */
+  todayEnd?: string;
 };
