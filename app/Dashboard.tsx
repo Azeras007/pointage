@@ -226,6 +226,16 @@ function Hero({ today, plan, report, busy, onPunch }: { today: DayRow; plan?: Pl
       <button className={`punch ${report.inProgress ? "out" : "in"}`} onClick={onPunch} disabled={busy}>
         {label}
       </button>
+      {today.punches.length > 0 && (
+        <ol className="history" aria-label="Pointages du jour">
+          {today.punches.map((p, i) => (
+            <li key={p}>
+              <span className="h-kind">{i % 2 ? "Sortie" : i === 0 ? "Entrée" : "Retour"}</span>
+              <span className="h-time">{parisHM(p)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
     </section>
   );
 }
@@ -284,6 +294,15 @@ function DayItem({ day, settings, mutate }: { day: DayRow; settings: Settings; m
         <span className={`d-bal ${pending ? "" : day.balanceMin < 0 ? "neg" : day.balanceMin > 0 ? "pos" : ""}`}>
           {running ? "en cours" : pending ? (future ? "" : fmtDuration(day.workedMin)) : day.missingExit ? "?" : day.balanceMin === 0 ? "✓" : `${day.balanceMin > 0 ? "+" : ""}${fmtDuration(day.balanceMin)}`}
         </span>
+        {day.punches.length > 0 && (
+          <span className="d-times">
+            {Array.from({ length: Math.ceil(day.punches.length / 2) }, (_, k) => {
+              const a = day.punches[2 * k];
+              const b = day.punches[2 * k + 1];
+              return `${parisHM(a)}–${b ? parisHM(b) : day.isToday ? "…" : "?"}`;
+            }).join("   ")}
+          </span>
+        )}
       </button>
       {open && (
         <div className="day-edit">
