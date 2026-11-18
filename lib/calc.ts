@@ -22,7 +22,8 @@ export function computeMonth(punches: number[], settings: Settings, now: number,
 
   const days: DayRow[] = daysOfMonth(month).map((date) => {
     const weekday = weekdayOf(date);
-    const list = byDay.get(date) ?? [];
+    const beforeStart = !!settings.startDate && date < settings.startDate;
+    const list = beforeStart ? [] : (byDay.get(date) ?? []);
     const isToday = date === today;
     const isPast = date < today;
     let workedMs = 0;
@@ -37,9 +38,9 @@ export function computeMonth(punches: number[], settings: Settings, now: number,
         missingExit = true;
       }
     }
-    const dueMin = settings.workDays.includes(weekday) ? dayMin : 0;
+    const dueMin = !beforeStart && settings.workDays.includes(weekday) ? dayMin : 0;
     const workedMin = Math.floor(workedMs / MIN);
-    return { date, weekday, dueMin, workedMin, balanceMin: workedMin - dueMin, punches: list, missingExit, isToday, isPast };
+    return { date, weekday, dueMin, workedMin, balanceMin: workedMin - dueMin, punches: list, missingExit, isToday, isPast, beforeStart };
   });
 
   const pastBalanceMin = days.filter((d) => d.isPast).reduce((s, d) => s + d.balanceMin, 0);

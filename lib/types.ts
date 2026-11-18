@@ -4,6 +4,8 @@ export type Settings = {
   /** 0 = dimanche … 6 = samedi */
   workDays: number[];
   dayEnd: string;
+  /** "YYYY-MM-DD" : jours antérieurs ignorés */
+  startDate?: string;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -23,6 +25,7 @@ export type DayRow = {
   missingExit: boolean;
   isToday: boolean;
   isPast: boolean;
+  beforeStart: boolean;
 };
 
 export type PlanRow = {

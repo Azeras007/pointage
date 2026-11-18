@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Manrope, Unbounded } from "next/font/google";
 import "./globals.css";
+
+const display = Unbounded({ subsets: ["latin"], weight: ["300", "500"], variable: "--font-display" });
+const body = Manrope({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-body" });
 
 export const metadata: Metadata = {
   title: "Pointage",
@@ -10,12 +14,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0f1115",
+  viewportFit: "cover",
+  themeColor: "#0a0f2c",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${display.variable} ${body.variable}`}>
       <body>{children}</body>
     </html>
   );

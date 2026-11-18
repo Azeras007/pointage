@@ -11,16 +11,16 @@ export default function Login() {
     setError("");
     const r = await fetch("/api/login", { method: "POST", body: JSON.stringify({ token }) });
     if (r.ok) window.location.href = "/";
-    else setError("Jeton incorrect");
+    else setError("Jeton incorrect, vérifie-le et réessaie.");
   }
 
   return (
-    <main className="wrap login">
+    <main className="shell login">
       <h1>Pointage</h1>
-      <form onSubmit={submit} className="card">
-        <label htmlFor="token">Jeton secret</label>
-        <input id="token" type="password" value={token} onChange={(e) => setToken(e.target.value)} autoFocus />
-        <button className="btn primary" type="submit">Entrer</button>
+      <form onSubmit={submit}>
+        <label htmlFor="token">Jeton</label>
+        <input id="token" type="password" value={token} onChange={(e) => setToken(e.target.value)} autoFocus autoComplete="current-password" />
+        <button className="punch" type="submit">Entrer</button>
         {error && <p className="neg">{error}</p>}
       </form>
     </main>

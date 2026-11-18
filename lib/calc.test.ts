@@ -80,6 +80,14 @@ describe("computeMonth", () => {
     expect(r2.deficitMin).toBe(13 * 480);
   });
 
+  it("ignore les jours avant la date de début", () => {
+    const r = computeMonth([], { ...DEFAULT_SETTINGS, startDate: "2026-11-18" }, NOW);
+    expect(r.deficitMin).toBe(0);
+    expect(r.dueMonthMin).toBe(5 * 480);
+    expect(r.days.find((d) => d.date === "2026-11-10")!.beforeStart).toBe(true);
+    expect(r.plan.length).toBe(5);
+  });
+
   it("découpe en heure de Paris au changement d'heure", () => {
     expect(parisDay(at("2026-10-25", "23:30"))).toBe("2026-10-25");
     expect(parisDay(at("2026-03-29", "00:30"))).toBe("2026-03-29");
