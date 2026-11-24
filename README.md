@@ -48,11 +48,14 @@ Deux appuis à moins d'une minute d'écart : le second est ignoré (« Ignoré (
 
 Le widget affiche ton solde cumulé d'avance ou de retard, en noir et blanc. Il se met à jour environ toutes les 15 minutes, selon le rythme fixé par iOS.
 
-1. Installe l'app gratuite **Scriptable** depuis l'App Store.
-2. Dans Scriptable, touche **+**, colle le contenu de [`widget/pointage-widget.js`](widget/pointage-widget.js), puis remplace `URL_APP` et `JETON` en haut du script. Nomme le script « Pointage ».
-3. Touche ▶︎ pour tester : un aperçu du widget s'affiche.
-4. Sur l'écran d'accueil, appui long → **+** → **Scriptable** → choisis la taille petite ou moyenne → **Ajouter**.
-5. Appui long sur le widget → **Modifier le widget** → **Script** : « Pointage ».
+Le plus simple : sur l'iPhone, ouvre `https://<ton-projet>.vercel.app/widget` (lien « Installer le widget iPhone » en bas de l'accueil). La page donne le script déjà rempli avec ton URL et ton jeton, et les étapes :
+
+1. Installe l'app gratuite **Scriptable** depuis l'App Store et ouvre-la une fois (sinon elle n'apparaît pas dans la liste des widgets).
+2. Touche **Copier le script**, puis dans Scriptable touche **+**, colle et nomme le script « Pointage ».
+3. Écran d'accueil : appui long → **Modifier** → **Ajouter un widget** → cherche « Scriptable » → taille petite ou moyenne.
+4. Touche le widget en mode modification → **Script** : « Pointage ».
+
+Le script source est dans [`widget/pointage-widget.js`](widget/pointage-widget.js).
 
 Ça marche aussi sur l'écran verrouillé : ajoute un widget Scriptable rectangulaire ou en ligne et choisis le même script.
 

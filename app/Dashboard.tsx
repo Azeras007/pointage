@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { fmtDuration, parisDay, parisHM, parisMonth, parisToMs } from "@/lib/time";
 import type { DayRow, MonthReport, PlanRow, Settings } from "@/lib/types";
@@ -174,6 +175,8 @@ export default function Dashboard() {
         settings={settings}
         onSave={(s) => mutate(() => api("/api/settings", { method: "PUT", body: JSON.stringify(s) })).then(() => flash("Réglages enregistrés"))}
       />
+
+      <Link className="widget-link" href="/widget">Installer le widget iPhone</Link>
 
       {toast && <div className="toast" role="status">{toast}</div>}
     </main>
