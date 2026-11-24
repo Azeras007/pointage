@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { fmtDuration, parisDay, parisHM, parisMonth, parisToMs } from "@/lib/time";
 import type { DayRow, MonthReport, PlanRow, Settings } from "@/lib/types";
 import type { TotalReport } from "@/lib/calc";
@@ -49,6 +49,41 @@ export default function Dashboard() {
     load();
     const t = setInterval(load, 30_000);
     return () => clearInterval(t);
+  }, [load]);
+
+  // Rafraîchit dès qu'un pointage est fait ailleurs (bouton Action, raccourci) :
+  // vérification légère toutes les 5 s quand l'app est visible, et au retour dans l'app.
+  const rev = useRef<number | null>(null);
+  useEffect(() => {
+    let stop = false;
+    async function check() {
+      if (document.visibilityState !== "visible") return;
+      try {
+        const r = await fetch("/api/rev", { cache: "no-store" });
+        if (!r.ok || stop) return;
+        const { rev: next } = await r.json();
+        if (rev.current !== null && next !== rev.current) load();
+        rev.current = next;
+      } catch {}
+    }
+    function onShow() {
+      if (document.visibilityState === "visible") {
+        load();
+        check();
+      }
+    }
+    check();
+    const t = setInterval(check, 5_000);
+    document.addEventListener("visibilitychange", onShow);
+    window.addEventListener("pageshow", onShow);
+    window.addEventListener("focus", onShow);
+    return () => {
+      stop = true;
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onShow);
+      window.removeEventListener("pageshow", onShow);
+      window.removeEventListener("focus", onShow);
+    };
   }, [load]);
 
   function flash(msg: string) {
