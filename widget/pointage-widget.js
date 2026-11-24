@@ -16,6 +16,21 @@ function duree(min, signe = true) {
   return `${s}${Math.floor(a / 60)}h${String(a % 60).padStart(2, "0")}`;
 }
 
+// Toucher « ↻ » relance ce script (ouvre Scriptable avec des chiffres à jour)
+const ACTUALISER = `scriptable:///run/${encodeURIComponent(Script.name())}`;
+const heure = () => new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+function entete(w, taille) {
+  const row = w.addStack();
+  row.centerAlignContent();
+  texte(row, "Solde", taille, GREY, "medium");
+  row.addSpacer();
+  const btn = row.addStack();
+  btn.url = ACTUALISER;
+  texte(btn, `↻ ${heure()}`, taille - 1, DARK);
+  return row;
+}
+
 const solde = (d) => (d.inProgress ? d.totalMin : d.liveMin);
 
 async function charger() {
@@ -62,12 +77,13 @@ function widgetEcran(d, famille) {
   const w = new ListWidget();
   w.backgroundColor = Color.black();
   w.setPadding(14, 16, 14, 16);
-  w.url = URL_APP;
-  w.refreshAfterDate = new Date(Date.now() + 15 * 60 * 1000);
+  // petit widget : une seule zone touchable, toucher = actualiser
+  w.url = famille === "small" ? ACTUALISER : URL_APP;
+  w.refreshAfterDate = new Date(Date.now() + 5 * 60 * 1000);
 
   // en poste : la journée n'est pas finie, on montre le solde des jours terminés
   const total = solde(d);
-  texte(w, "Solde", 12, GREY, "medium");
+  entete(w, 12);
   w.addSpacer(2);
   texte(w, duree(total), famille === "small" ? 38 : 44, WHITE, "light");
   texte(w, total > 0 ? "d'avance" : total < 0 ? "de retard" : "à l'équilibre", 12, GREY);
@@ -92,8 +108,8 @@ function widgetEcran(d, famille) {
 
 function widgetVerrouillage(d, famille) {
   const w = new ListWidget();
-  w.url = URL_APP;
-  w.refreshAfterDate = new Date(Date.now() + 15 * 60 * 1000);
+  w.url = ACTUALISER;
+  w.refreshAfterDate = new Date(Date.now() + 5 * 60 * 1000);
   if (famille === "accessoryInline") {
     texte(w, `Solde ${duree(solde(d))}`, 12, WHITE);
   } else {
@@ -107,6 +123,7 @@ function widgetVerrouillage(d, famille) {
 function widgetErreur(msg) {
   const w = new ListWidget();
   w.backgroundColor = Color.black();
+  w.url = ACTUALISER;
   texte(w, "Pointage", 12, GREY, "medium");
   w.addSpacer(4);
   const t = w.addText(msg);
@@ -121,7 +138,7 @@ try {
   const d = await charger();
   widget = famille.startsWith("accessory") ? widgetVerrouillage(d, famille) : widgetEcran(d, famille);
 } catch (e) {
-  widget = widgetErreur(`Pas de connexion à l'app. ${e.message ?? ""}`);
+  widget = widgetErreur(`Pas de connexion à l'app. ${e.message ?? ""} Touche pour réessayer.`);
 }
 
 if (config.runsInWidget) Script.setWidget(widget);

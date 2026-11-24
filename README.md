@@ -57,6 +57,8 @@ Le plus simple : sur l'iPhone, ouvre `https://<ton-projet>.vercel.app/widget` (l
 
 Le script source est dans [`widget/pointage-widget.js`](widget/pointage-widget.js).
 
+Pour actualiser à la main, touche **↻** en haut à droite du widget (le petit widget s'actualise si tu le touches n'importe où). Scriptable s'ouvre un instant avec les chiffres à jour. iOS ne permet pas à Scriptable de recharger le widget sans ouvrir l'app. L'heure à côté de ↻ indique la dernière mise à jour.
+
 Ça marche aussi sur l'écran verrouillé : ajoute un widget Scriptable rectangulaire ou en ligne et choisis le même script.
 
 Le widget lit `GET /api/total`, qui renvoie le solde au format JSON.

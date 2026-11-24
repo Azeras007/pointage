@@ -212,7 +212,8 @@ button:disabled { cursor: default; }
 .widget-page h1 { font-family: var(--display); font-weight: 200; font-size: 2.2rem; letter-spacing: -0.04em; margin: 18px 0 20px; }
 .steps { margin: 0 0 24px; padding-left: 1.2em; color: var(--muted); }
 .steps li { margin-bottom: 10px; padding-left: 4px; }
-.steps strong { color: var(--text); font-weight: 600; }
+.steps strong, .widget-page .note strong { color: var(--text); font-weight: 600; }
+.widget-page .note { margin: 0 0 20px; }
 .punch.copy { width: 100%; }
 .code { margin: 20px 0 0; padding: 14px; border: 1px solid var(--line); border-radius: 12px; font-size: 0.7rem; line-height: 1.5; color: var(--muted); max-height: 260px; overflow: auto; white-space: pre; }
 .widget-link { display: block; text-align: center; color: var(--muted); font-size: 0.9rem; padding: 18px 0 0; border-top: 1px solid var(--line); text-decoration: none; }

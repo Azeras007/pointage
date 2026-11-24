@@ -32,6 +32,10 @@ export default async function WidgetPage() {
         <li>Sur l&apos;écran d&apos;accueil, appui long sur un espace vide → <strong>Modifier</strong> → <strong>Ajouter un widget</strong>, cherche « Scriptable », choisis la taille petite ou moyenne.</li>
         <li>Touche le widget ajouté (toujours en mode modification) → <strong>Script</strong> : « Pointage ».</li>
       </ol>
+      <p className="note">
+        Pour actualiser à la main, touche <strong>↻</strong> en haut à droite du widget (sur le petit widget, touche-le n&apos;importe où) :
+        Scriptable s&apos;ouvre un instant avec les chiffres à jour, puis le widget se redessine. L&apos;heure à côté de ↻ indique la dernière mise à jour.
+      </p>
       <CopyButton text={script} />
       <p className="note">Ce script contient ton jeton : ne le partage pas.</p>
       <pre className="code">{script}</pre>
