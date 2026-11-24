@@ -91,3 +91,31 @@ export function computeMonth(punches: number[], settings: Settings, now: number,
     todayEnd,
   };
 }
+
+export type TotalReport = {
+  /** solde cumulé des jours passés depuis le début du suivi (min) */
+  totalMin: number;
+  /** solde d'aujourd'hui en temps réel (min), 0 si rien pointé */
+  todayMin: number;
+  /** premier mois pris en compte "YYYY-MM" */
+  since: string;
+  months: { month: string; balanceMin: number }[];
+};
+
+/** Cumule l'avance ou le retard de tous les mois, du début du suivi jusqu'à `now`. */
+export function computeTotal(punches: number[], settings: Settings, now: number): TotalReport {
+  const current = parisMonth(now);
+  const first = settings.startDate?.slice(0, 7) ?? (punches.length ? parisMonth(Math.min(...punches)) : current);
+  const months: { month: string; balanceMin: number }[] = [];
+  let todayMin = 0;
+  let m = first <= current ? first : current;
+  while (m <= current) {
+    const r = computeMonth(punches, settings, now, m);
+    months.push({ month: m, balanceMin: r.pastBalanceMin });
+    const t = r.days.find((d) => d.isToday);
+    if (t && t.punches.length > 0) todayMin = t.balanceMin;
+    const [y, mo] = m.split("-").map(Number);
+    m = mo === 12 ? `${y + 1}-01` : `${y}-${String(mo + 1).padStart(2, "0")}`;
+  }
+  return { totalMin: months.reduce((s, x) => s + x.balanceMin, 0), todayMin, since: first, months };
+}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { fmtDuration, parisDay, parisHM, parisMonth, parisToMs } from "@/lib/time";
 import type { DayRow, MonthReport, PlanRow, Settings } from "@/lib/types";
+import type { TotalReport } from "@/lib/calc";
 
 const DAY_NAMES = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 const DAY_FULL = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
@@ -32,6 +33,7 @@ export default function Dashboard() {
   const [month, setMonth] = useState(() => parisMonth(Date.now()));
   const [report, setReport] = useState<MonthReport | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [total, setTotal] = useState<TotalReport | null>(null);
   const [toast, setToast] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -39,6 +41,7 @@ export default function Dashboard() {
     const data = await (await api(`/api/report?month=${month}`)).json();
     setReport(data.report);
     setSettings(data.settings);
+    setTotal(data.total);
   }, [month]);
 
   useEffect(() => {
@@ -104,6 +107,8 @@ export default function Dashboard() {
           </p>
         </section>
       )}
+
+      {total && <BalanceWidget total={total} />}
 
       {missing.length > 0 && (
         <p className="alert">
@@ -205,6 +210,11 @@ function Hero({ today, plan, report, busy, onPunch }: { today: DayRow; plan?: Pl
               <stop offset="1" stopColor="var(--violet)" />
             </linearGradient>
           </defs>
+          <g className="ticks">
+            {Array.from({ length: 48 }, (_, i) => (
+              <line key={i} x1="120" y1={i % 4 ? 2 : -4} x2="120" y2="6" transform={`rotate(${i * 7.5} 120 120)`} className={i / 48 < ratio ? "lit" : ""} />
+            ))}
+          </g>
           <circle cx="120" cy="120" r={R} className="track" />
           <circle
             cx="120"
@@ -386,5 +396,63 @@ function SettingsPanel({ settings, onSave }: { settings: Settings; onSave: (s: S
         <button className="mini primary wide" onClick={() => onSave(s)}>Enregistrer les réglages</button>
       </div>
     </details>
+  );
+}
+
+const MONTH_SHORT = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+
+function BalanceWidget({ total }: { total: TotalReport }) {
+  const t = total.totalMin;
+  const live = t + total.todayMin;
+  const scale = Math.max(8 * 60, Math.abs(t));
+  const fill = (Math.abs(t) / scale) * 50;
+  const tone = t > 0 ? "pos" : t < 0 ? "neg" : "zero";
+  const a = Math.abs(t);
+  const maxBar = Math.max(60, ...total.months.map((m) => Math.abs(m.balanceMin)));
+
+  return (
+    <section className={`balance ${tone}`} aria-label="Solde cumulé d'heures">
+      <div className="b-head">
+        <h2>Solde cumulé</h2>
+        <span className="b-since">depuis {MONTHS[Number(total.since.slice(5)) - 1]} {total.since.slice(0, 4)}</span>
+      </div>
+      <p className="b-value">
+        <span className="b-sign">{t > 0 ? "+" : t < 0 ? "−" : ""}</span>
+        {Math.floor(a / 60)}
+        <small>h</small>
+        {String(a % 60).padStart(2, "0")}
+      </p>
+      <p className="b-word">{t > 0 ? "d'avance sur ton planning" : t < 0 ? "de retard à rattraper" : "Pile à l'équilibre"}</p>
+
+      <div className="meter" role="img" aria-label={`${t >= 0 ? "Avance" : "Retard"} de ${hm(a)}`}>
+        <span className="m-fill" style={t >= 0 ? { left: "50%", width: `${fill}%` } : { right: "50%", width: `${fill}%` }} />
+        <span className="m-zero" />
+        <span className="m-tip" style={{ left: `${50 + (t >= 0 ? fill : -fill)}%` }} />
+      </div>
+      <div className="m-legend">
+        <span>retard</span>
+        <span>avance</span>
+      </div>
+
+      {total.todayMin !== 0 && (
+        <p className="b-live">
+          <span className="dot" />
+          Avec aujourd&apos;hui : <strong className={live >= 0 ? "pos" : "neg"}>{live > 0 ? "+" : ""}{fmtDuration(live)}</strong>
+        </p>
+      )}
+
+      {total.months.length > 1 && (
+        <ol className="b-months" aria-label="Solde par mois">
+          {total.months.map((m) => (
+            <li key={m.month} title={`${monthLabel(m.month)} : ${fmtDuration(m.balanceMin)}`}>
+              <span className="bm-bar">
+                <span className={m.balanceMin >= 0 ? "up" : "down"} style={{ height: `${(Math.abs(m.balanceMin) / maxBar) * 50}%` }} />
+              </span>
+              <span className="bm-label">{MONTH_SHORT[Number(m.month.slice(5)) - 1]}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
   );
 }
