@@ -44,6 +44,20 @@ Ouvre l'URL `https://<ton-projet>.vercel.app`, colle ton jeton, puis dans Safari
 
 Deux appuis à moins d'une minute d'écart : le second est ignoré (« Ignoré (doublon) »).
 
+## 4. Widget d'écran d'accueil
+
+Le widget affiche ton solde cumulé d'avance ou de retard, en noir et blanc. Il se met à jour environ toutes les 15 minutes, selon le rythme fixé par iOS.
+
+1. Installe l'app gratuite **Scriptable** depuis l'App Store.
+2. Dans Scriptable, touche **+**, colle le contenu de [`widget/pointage-widget.js`](widget/pointage-widget.js), puis remplace `URL_APP` et `JETON` en haut du script. Nomme le script « Pointage ».
+3. Touche ▶︎ pour tester : un aperçu du widget s'affiche.
+4. Sur l'écran d'accueil, appui long → **+** → **Scriptable** → choisis la taille petite ou moyenne → **Ajouter**.
+5. Appui long sur le widget → **Modifier le widget** → **Script** : « Pointage ».
+
+Ça marche aussi sur l'écran verrouillé : ajoute un widget Scriptable rectangulaire ou en ligne et choisis le même script.
+
+Le widget lit `GET /api/total`, qui renvoie le solde au format JSON.
+
 ## Règles de calcul
 
 - Prévu : 8 h par lundi, mardi et mercredi (modifiable dans **Réglages**).

@@ -6,8 +6,8 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Pointage",
     start_url: "/",
     display: "standalone",
-    background_color: "#0f1115",
-    theme_color: "#0f1115",
+    background_color: "#000000",
+    theme_color: "#000000",
     icons: [{ src: "/favicon.ico", sizes: "any", type: "image/x-icon" }],
   };
 }

@@ -108,7 +108,7 @@ export default function Dashboard() {
         </section>
       )}
 
-      {total && <BalanceWidget total={total} />}
+      {total && <BalanceWidget total={total} inProgress={isCurrent && report.inProgress} />}
 
       {missing.length > 0 && (
         <p className="alert">
@@ -204,24 +204,12 @@ function Hero({ today, plan, report, busy, onPunch }: { today: DayRow; plan?: Pl
     <section className="hero">
       <div className={`ring ${report.inProgress ? "live" : ""}`}>
         <svg viewBox="0 0 240 240" aria-hidden="true">
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="var(--cyan)" />
-              <stop offset="1" stopColor="var(--violet)" />
-            </linearGradient>
-          </defs>
-          <g className="ticks">
-            {Array.from({ length: 48 }, (_, i) => (
-              <line key={i} x1="120" y1={i % 4 ? 2 : -4} x2="120" y2="6" transform={`rotate(${i * 7.5} 120 120)`} className={i / 48 < ratio ? "lit" : ""} />
-            ))}
-          </g>
           <circle cx="120" cy="120" r={R} className="track" />
           <circle
             cx="120"
             cy="120"
             r={R}
             className="arc"
-            stroke="url(#g)"
             strokeDasharray={C}
             strokeDashoffset={C * (1 - ratio)}
             transform="rotate(-90 120 120)"
@@ -401,7 +389,7 @@ function SettingsPanel({ settings, onSave }: { settings: Settings; onSave: (s: S
 
 const MONTH_SHORT = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 
-function BalanceWidget({ total }: { total: TotalReport }) {
+function BalanceWidget({ total, inProgress }: { total: TotalReport; inProgress: boolean }) {
   const t = total.totalMin;
   const live = t + total.todayMin;
   const scale = Math.max(8 * 60, Math.abs(t));
@@ -434,7 +422,7 @@ function BalanceWidget({ total }: { total: TotalReport }) {
         <span>avance</span>
       </div>
 
-      {total.todayMin !== 0 && (
+      {total.todayMin !== 0 && !inProgress && (
         <p className="b-live">
           <span className="dot" />
           Avec aujourd&apos;hui : <strong className={live >= 0 ? "pos" : "neg"}>{live > 0 ? "+" : ""}{fmtDuration(live)}</strong>
